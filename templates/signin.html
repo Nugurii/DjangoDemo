@@ -5,14 +5,15 @@
 <html lang="en">
 
 <head>
-    <meta charset="UTF-8"> {% block title %}
-    <title>Sign in to Home</title>{% endblock %} {% block css %}
-    <link rel="stylesheet" href="{% static 'css/signin.css' %}">{% endblock %} {% block js %}
-    <script type="text/javascript" src="{% static 'js/signin.js' %}"></script>{% endblock %}
+    <meta charset="UTF-8"> 
+    {% block title %}<title>Sign in to Home</title>{% endblock %} 
+    {% block css %}<link rel="stylesheet" href="{% static 'css/signin.css' %}">{% endblock %} 
+    {% block js %}<script type="text/javascript" src="{% static 'js/signin.js' %}"></script>{% endblock %}
 </head>
 
 <body>
-    {% block content %}{% endblock %} {% block signin %}
+    {% block content %}{% endblock %} 
+    {% block signin %}
     <div class="signin-container">
         <div class="signin-header">
             <span>Sign in to Home</span>

@@ -5,14 +5,15 @@
 <html lang="en">
 
 <head>
-    <meta charset="UTF-8"> {% block title %}
-    <title>Create your account</title>{% endblock %} {% block css %}
-    <link rel="stylesheet" href="{% static 'css/signup.css' %}">{% endblock %} {% block js %}
-    <script type="text/javascript" src="{% static 'js/signup.js' %}"></script>{% endblock %}
+    <meta charset="UTF-8"> 
+    {% block title %}<title>Create your account</title>{% endblock %} 
+    {% block css %}<link rel="stylesheet" href="{% static 'css/signup.css' %}">{% endblock %} 
+    {% block js %}<script type="text/javascript" src="{% static 'js/signup.js' %}"></script>{% endblock %}
 </head>
 
 <body>
-    {% block content %} {% endblock %} {% block signup %}
+    {% block content %} {% endblock %} 
+    {% block signup %}
     <div class="signup-container">
         <div class="signup-flash-success" hidden id="flash-box">
             <span class="signup-flash-message" id="flash-messag">Sign up successfully! </span>

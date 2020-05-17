@@ -27,7 +27,7 @@
         <span class="home-float-name">{{ request.session.user_name }}</span> {% else %}
         <a class="home-float-right" href="/user/signup">sign up</a>
         <a class="home-float-right" href="/user/signin">sign in</a> {% endif %}
-    </div> {% endcomment %}
+    </div> {% endcomment %} 
     {% csrf_token %}
     <nav class="navbar navbar-expand-sm navbar-expand-lg bg-purple">
         <a class="navbar-brand" href="/">
@@ -38,7 +38,8 @@
         </button>
         <div class="collapse navbar-collapse" id="navbarSupportedContent">
             <ul class="navbar-nav mr-auto">
-                {% comment %} <li class="nav-item">
+                {% comment %}
+                <li class="nav-item">
                     <a class="nav-link" href="/">Home <span class="sr-only">(current)</span></a>
                 </li>
                 <li class="nav-item">
@@ -100,7 +101,9 @@
             </div>
             <input class="home-btn" type="button" value="查询" />
         </div>
-        {% endblock %} {% block signup %}{% endblock %} {% block signin %}{% endblock %}
+        {% endblock %} 
+        {% block signup %}{% endblock %} 
+        {% block signin %}{% endblock %}
 </body>
 
 </html>
