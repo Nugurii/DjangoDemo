@@ -30,6 +30,13 @@ ALLOWED_HOSTS = []
 
 # Application definition
 
+REST_FRAMEWORK = {
+    'DEFAULT_AUTHENTICATION_CLASSES': [
+        'rest_framework.authentication.BasicAuthentication',
+        'rest_framework.authentication.SessionAuthentication',
+    ]
+}
+
 INSTALLED_APPS = [
     'django.contrib.admin',
     'django.contrib.auth',
@@ -37,6 +44,7 @@ INSTALLED_APPS = [
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
+    'rest_framework',
     'myapp',
 ]
 
@@ -77,11 +85,11 @@ WSGI_APPLICATION = 'DjangoDemo.wsgi.application'
 
 DATABASES = { 'default': { 
     'ENGINE': 'django.db.backends.mysql',
-    'NAME': 'django_mysql',        #数据库名字                     
-    'USER': 'root',          #账号
-    'PASSWORD': '',      #密码
-    'HOST': '127.0.0.1',    #IP
-    'PORT': '3306',         #端口
+    'NAME': 'django_mysql',
+    'USER': 'root',
+    'PASSWORD': '',
+    'HOST': '127.0.0.1',
+    'PORT': '3306',
     }
 }
 
