@@ -9,9 +9,11 @@
 <font face="Consolas">
 
 `python`==3.7<br>
-`Django`==2.2<br>
-`mysqlclient`>=1.3.13<br>
-`mysql`>=5.7<br>
+`django`==2.2<br>
+`djangorestframework`==3.11.0<br>
+`djangorestframework-jwt`==1.11.0<br>
+`mysqlclient`==1.4.6<br>
+`mysql`==8.0.20<br>
 
 </font>
 
@@ -25,13 +27,25 @@
 pip install django==2.2
 ```
 
-2. 安装 `mysqlclient`
+2. 安装 `djangorestframework`
+
+```c
+pip install djangorestframework
+```
+
+3. 安装 `djangorestframework-jwt`
+
+```c
+pip install djangorestframework-jwt
+```
+
+4. 安装 `mysqlclient`
 
 ```c
 pip install mysqlclient
 ```
 
-3. 修改 `DjangoDemo\settings.py` 数据库配置。使用 `root` 账户登录 `mysql` ，新建数据库 `django_mysql`（数据库名可以修改，但应和 `NAME` 保持一致）。其次，将 `PASSWORD` 修改为你的数据库密码。`HOST` 和 `PORT` 无需改动。
+5. 修改 `DjangoDemo\settings.py` 数据库配置。使用 `root` 账户登录 `mysql` ，新建数据库 `django_mysql`（数据库名可以修改，但应和 `NAME` 保持一致）。其次，将 `PASSWORD` 修改为你的数据库密码。`HOST` 和 `PORT` 无需改动。
 
 ```c
 DATABASES = { 'default': {
@@ -45,14 +59,14 @@ DATABASES = { 'default': {
 }
 ```
 
-4. 数据库迁移。在 `DjangoDemo` 目录下执行
+6. 数据库迁移。在根目录下执行
 
 ```c
 python manage.py makemigrations
 python manage.py migrate
 ```
 
-5. 运行项目。在 `DjangoDemo` 目录下执行
+7. 运行项目。在根目录下执行
 
 ```c
 python manage.py runserver
@@ -68,9 +82,9 @@ python manage.py runserver
 
 </font>
 
-## <font face="Consolas" size=5>接口说明</font>
+## <font face="Consolas" size=5>后端接口说明</font>
 
-1. /，home 页面接口名为 `DjangoDemo\myapp\forms.py` 中自定义表单 `DateForm` 中的 `date`，接受的参数为 `YY-MM-DD` 格式的字符串，返回格式为字符串，在后端使用 `session` 判断用户是否处于登录状态。
+1. `/api/home`，接受的参数为 `json` 字符串，返回格式为`json`。
 
     <table align="center">
         <tr>
@@ -79,7 +93,7 @@ python manage.py runserver
         </tr>
     </table>
 
-2. /user/signin/，继承 home 页面，signin 页面接口名为 `DjangoDemo\myapp\forms.py` 中自定义表单 `UserForm` 中的 `username` 和 `password`，接受的参数为非空字符串，返回格式为字符串。若登录失败，后端返回 `Incorrect username or password.`；若登录成功，后端通过 `session` 设置用户处于登录状态，并直接跳转至 `home` 页面，右上角显示用户信息。
+2. `/api/user/signin`，接受的参数为`json`字符串，返回格式为`json`。若登录失败，后端返回 `Incorrect username or password.`；若登录成功，后端通过 `jwt` 生成`token`，**有效期为3分钟**，并直接跳转至 `home` 页面，右上角显示用户信息。
 
     <table align="center">
         <tr>
@@ -88,7 +102,7 @@ python manage.py runserver
         </tr>
     </table>
 
-3. /user/signup/，继承 home 页面，signup 页面接口名为 `DjangoDemo\myapp\forms.py` 中自定义表单 `RegisterForm` 中的 `username` 和 `password`，接受的参数为非空字符串，返回格式为字符串。若注册失败，后端返回 `Username is already taken`；若注册成功，后端返回 `Sign up successfully!`。
+3. `/api/user/signup`，接受的参数为`json`字符串，返回格式为`json`。若注册失败，后端返回 `Username is already taken`；若注册成功，后端返回 `Sign up successfully!`。
 
     <table align="center">
         <tr>
@@ -96,3 +110,5 @@ python manage.py runserver
             <td><center><img src="https://img-blog.csdnimg.cn/20200510122040795.PNG" width="400">注册失败</center></td>
         </tr>
     </table>
+
+4. `/api/token-verify`，接受的参数为`json`字符串，返回格式为`json`。用于验证 token。
