@@ -4,3 +4,4 @@ __pycache__/
 0002_remove_user_sex.py
 0003_remove_user_email.py
 node_modules/
+.vscode
