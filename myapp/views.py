@@ -1,9 +1,17 @@
-# from django.shortcuts import render
-from . import models 
-from .forms import SigninForm, SignupForm, DateForm
+from .models import User
+from .serializers import UserSerializers
+from .forms import SigninForm, SignupForm
+from .constants import ACTION_SIGNUP, ACTION_USERNAME_CHECK, JWT_KEY
+from  django.shortcuts import HttpResponse
+from  rest_framework.views import APIView
+from  rest_framework.response import Response
+from  rest_framework_jwt.settings import api_settings
 import json
+import jwt
+import datetime
 
-from django.shortcuts import render, redirect, HttpResponse, HttpResponseRedirect
+jwt_encode_handler = api_settings.JWT_ENCODE_HANDLER
+jwt_decode_handler = api_settings.JWT_DECODE_HANDLER
 
 def fib(n):
     if n == 0:
@@ -13,55 +21,48 @@ def fib(n):
     else:
         return fib(n - 1) + fib(n - 2)
 
-def home(request):
-    print('0000')
-    if request.method == "POST":
-        print('7878')
-        date_form = DateForm(request.POST)
-        print('9090')
-        if not request.session.get('is_signin', None):
-            message = '未登录！'
-            return render(request, 'home.html', {"date_form": date_form, "message": message})
-        else:
-            if date_form.is_valid(): 
-                # date = request.POST.get('date')
-                print('1212')
-                date = date_form.cleaned_data['date']
-                print(date)
-                if date[5:] == '01-01':
-                    message = '元旦'
-                elif date[5:] == '10-01':
-                    message = '国庆节'
-                elif date[5:] == '12-25':
-                    message = '圣诞节'
-                else:
-                    message = ''
-                return render(request, 'home.html', {"date_form": date_form, "message": message})
-    date_form = DateForm()
-    return render(request, 'home.html', {"date_form": date_form})
-
-def signin(request):
-    print('1111')
-    if request.method == "POST":
+class TokenVerifyView(APIView):
+    def post(self,request,*args,**kwargs):
         reply = {'status': False, 'msg': None}
-        print('3434')
-        print(fib(32)) # delay
-        # username = request.POST.get('username')
-        # password = request.POST.get('password')
+        try:
+            token = request.META.get('HTTP_AUTHORIZATION')
+            if token == None:
+                reply['status'] = False
+                reply['msg'] = 'Token does not exist'
+                return HttpResponse(json.dumps(reply))
+            payload = jwt_decode_handler(token)
+            reply['status'] = True
+            reply['msg'] = 'Ok'
+        except jwt.ExpiredSignature:
+            reply['status'] = False
+            reply['msg'] = 'Token has been expired'
+        except:
+            reply['status'] = False
+            reply['msg'] = 'Token is invaild'
+        return HttpResponse(json.dumps(reply))
+
+class SigninView(APIView):
+    def post(self,request,*args,**kwargs):
+        reply = {'status': False, 'msg': None}
         decode_data = json.loads(request.body)
-        print(request.body, decode_data)
         signin_form = SigninForm(decode_data)
-        # signin_form = SigninForm(request.POST)
+        print(fib(30)) # delay
         if signin_form.is_valid():
             username = signin_form.cleaned_data['username']
             password = signin_form.cleaned_data['password']
             try:
-                user = models.User.objects.get(name=username)
+                user = User.objects.get(name=username)
                 if user.password == password:
-                    request.session['is_signin'] = True
-                    request.session['user_name'] = user.name
                     reply['status'] = True
                     reply['msg'] = 'Sign in successfully'
+                    reply['user'] = username
+                    payload = {
+                        'user_id': user.pk,
+                        'username': username,
+                        'exp': (datetime.datetime.now() + api_settings.JWT_EXPIRATION_DELTA).timestamp()
+                    }
+                    token = jwt_encode_handler(payload)
+                    reply['token'] = token
                     return HttpResponse(json.dumps(reply))
                 else:
                     reply['status'] = False
@@ -69,28 +70,35 @@ def signin(request):
             except:
                 reply['status'] = False
                 reply['msg'] = 'Invalid username'
+        else:
+            reply['status'] = False
+            reply['msg'] = 'Invalid username or password'
         return HttpResponse(json.dumps(reply))
-    return render(request, 'signin.html')
 
-def signup(request):
-    print('3333')
-    if request.method == "POST":
+class SignupView(APIView):
+    def post(self,request,*args,**kwargs):
         reply = {'status': True, 'msg': None}
-        action = request.POST.get('type')
-        if action == "0":
-            # print(fib(27))
-            username = request.POST.get('username')
-            same_name_user = models.User.objects.filter(name=username)
+        decode_data = json.loads(request.body)
+        # action = request.POST.get('action') # www-form-urlencoded
+        action = decode_data['action']
+        # if action == "0": # www-form-urlencoded
+        if action == ACTION_USERNAME_CHECK: # json
+            username = decode_data['username']
+            same_name_user = User.objects.filter(name=username)
             if same_name_user:
                 reply['status'] = False
-            reply['msg'] = len(username)
+            else:
+                reply['status'] = True
             return HttpResponse(json.dumps(reply))
-        elif action == "1":
-            print(fib(32))
-            username = request.POST.get('username')
-            password = request.POST.get('password')
+        # elif action == "1": # www-form-urlencoded
+        elif action == ACTION_SIGNUP: # json
+            print(fib(30))
+            # username = request.POST.get('username')
+            # password = request.POST.get('password')
+            username = decode_data['username']
+            password = decode_data['password']
             try:
-                new_user = models.User.objects.create()
+                new_user = User.objects.create()
                 new_user.name = username
                 new_user.password = password
                 new_user.save()
@@ -99,14 +107,25 @@ def signup(request):
                 reply['status'] = False
                 reply['msg'] = 'Error occured when creating account.'
             return HttpResponse(json.dumps(reply))
-    return render(request, 'signup.html')
 
-def logout(request):
-    print('5555')
-    if not request.session.get('is_signin', None): # 如果本来就未登录，也就没有登出一说
-        return redirect("/")
-    request.session.flush() # 或者使用下面的方法
-    # del request.session['is_signin']
-    # del request.session['user_id']
-    # del request.session['user_name']
-    return redirect("/")
+class LogoutView(APIView):
+    def post(self,request,*args,**kwargs):
+        reply = {'status': True, 'msg': None}
+        return HttpResponse(json.dumps(reply))
+
+class HomeView(APIView):
+    def post(self,request,*args,**kwargs):
+        print(fib(30))
+        decode_data = json.loads(request.body)
+        date = decode_data['date']
+        print(date[5:])
+        reply = {'status': True, 'msg': None}
+        if date[5:] == '01-01':
+            reply['msg'] = '元旦'
+        elif date[5:] == '10-01':
+            reply['msg'] = '国庆节'
+        elif date[5:] == '12-25':
+            reply['msg'] = '圣诞节'
+        else:
+            reply['status'] = False
+        return HttpResponse(json.dumps(reply))
